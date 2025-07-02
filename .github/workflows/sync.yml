@@ -5,8 +5,8 @@ permissions:
 
 on:
   schedule:
-    - cron: "45 2 * * *"  # 每天定时同步一次
-  workflow_dispatch:  # 支持手动触发
+    - cron: "45 2 * * *" # every day
+  workflow_dispatch:
 
 jobs:
   sync_latest_from_upstream:
@@ -15,26 +15,26 @@ jobs:
     if: ${{ github.event.repository.fork }}
 
     steps:
-      # Step 1: Checkout 目标仓库
+      # Step 1: run a standard checkout action
       - name: Checkout target repo
         uses: actions/checkout@v3
 
-      # Step 2: 同步 upstream 更改
+      # Step 2: run the sync action
       - name: Sync upstream changes
         id: sync
         uses: aormsby/Fork-Sync-With-Upstream-action@v3.4
         with:
-          upstream_sync_repo: MetaCubeX/meta-rules-dat  # 上游仓库
-          upstream_sync_branch: meta  # 上游仓库中的 meta 分支
-          target_sync_branch: meta  # 你的 fork 仓库中的 meta 分支
-          target_repo_token: ${{ secrets.GITHUB_TOKEN }}  # 自动生成的 token
+          upstream_sync_repo:  MetaCubeX/meta-rules-dat
+          upstream_sync_branch: meta
+          target_sync_branch: meta
+          target_repo_token: ${{ secrets.GITHUB_TOKEN }} # automatically generated, no need to set
 
-          # 设置为 true 可进行测试
+          # Set test_mode true to run tests instead of the true action!!
           test_mode: false
 
-      # Step 3: 同步检查（失败时发送提示）
       - name: Sync check
         if: failure()
         run: |
-          echo "[Error] 由于上游仓库的 workflow 文件变更，导致 GitHub 自动暂停了本次自动更新，你需要手动 Sync Fork 一次，详细教程请查看项目README.md"
+          echo "[Error] 由于上游仓库的 workflow 文件变更，导致 GitHub 自动暂停了本次自动更新，你需要手动 Sync Fork 一次，详细教程请查看项目README.md "
+          echo "[Error] Due to a change in the workflow file of the upstream repository, GitHub has automatically suspended the scheduled automatic update. You need to manually sync your fork. Please refer to the project README.md for instructions. "
           exit 1
